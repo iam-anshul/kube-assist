@@ -1,0 +1,10 @@
+kubernetes==32.0.1
+fastapi==0.115.7
+uvicorn==0.32.0
+pydantic-ai==0.0.43
+dotenv
+sqlalchemy
+alembic
+psycopg2-binary==2.9.10
+supertokens-python==0.28.1
+python-multipart

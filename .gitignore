@@ -1,0 +1,15 @@
+db-data
+.venv
+.env
+kube-assist-backend/.env
+kube-assist-backend/source/rough.py
+.pyc
+**/__pycache__/
+.vscode
+.DS_Store
+
+# Agent conversation transcripts - contain real cluster/session data
+histroy.json
+new-histroy.json
+*histroy*.json
+*history*.json

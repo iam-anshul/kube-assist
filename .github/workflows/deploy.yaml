@@ -1,0 +1,56 @@
+name: Deploy to Digital Ocean Dev Server
+
+on:
+  workflow_dispatch:
+    
+  push:
+    branches:
+      - main
+    paths:
+      - kube-assist-backend/**
+env:
+  IMAGE_URI: ${{ secrets.IMAGE_URI }}:main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: aws-actions/setup-sam@v2
+      with:
+        use-installer: true
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.REGION }}
+
+    - name: Retrieve an authentication token and authenticate your Docker client to your registry
+      run: ${{ secrets.ECR_AUTHENTICATION_TOKEN }}
+
+
+    - name: Install SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    
+    - name: build and push
+      id: build-and-push
+      run: |
+        docker build -t ${{ env.IMAGE_URI }} .
+        docker push ${{ env.IMAGE_URI }}
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_IP }} "
+          cd /home/ubuntu/backend
+          ${{ secrets.ECR_LOGIN }}
+          sudo docker compose pull
+          sudo docker compose down
+          sudo docker compose up -d
+          sudo docker image prune -af --filter "until=24h"
+          sudo docker builder prune -f --filter "until=24h"
+        "

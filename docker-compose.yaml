@@ -1,0 +1,13 @@
+services:
+  server:
+    image: 827695660685.dkr.ecr.ap-south-1.amazonaws.com/kubeassist-base:latest
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/kube-assist
+    command: ["sleep", "172800"]
+
+
+
+
+
